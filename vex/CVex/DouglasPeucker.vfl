@@ -1,0 +1,50 @@
+function float DistancePointLine(vector p, a, b){
+    float dis;
+    vector ab = a-b;
+    vector ap = a-p;
+    float t = dot(ab,ap)/dot(ab,ab);
+    if(0<=t<=1){    //HP
+        vector h = a - ab*t;
+        dis = distance(h, p);
+    }else if(t<0){  //AP
+        dis = distance(a, p);
+    }else{          //BP
+        dis = distance(b, p);
+    }
+    return dis;
+}
+
+cvex DouglasPeucker(vector list[] = {}; float epsilon = 0; export vector rList[] = {}){
+    float dmax = 0;
+    int index = 0;
+    int end = len(list);
+
+    for(int i=1; i<end-1; i++){
+        float d;
+        d = DistancePointLine(list[i], list[0], list[end-1]);
+        if(d > dmax){
+            index = i;
+            dmax = d;
+        }
+    }
+
+    if(dmax > epsilon){
+        vector newList1[];
+        for(int i=0; i<=index; i++){
+            push(newList1, list[i]);
+        }
+        vector newList2[];
+        for(int i=index; i<end; i++){
+            push(newList2, list[i]);
+        }
+        vector recResult1[];
+        vector recResult2[];
+        DouglasPeucker("list", newList1, "epsilon", epsilon, "rList", recResult1);
+        DouglasPeucker("list", newList2, "epsilon", epsilon, "rList", recResult2);
+        push(rList, recResult1);
+        push(rList, recResult2);
+    }else{
+        push(rList, list[0]);
+        push(rList, list[end-1]);
+    }   
+}

@@ -1,0 +1,7 @@
+cvex callee(export int mval = 0;
+        int rval = 0;
+        export int wval = 0;)
+{
+    mval *= 2;
+    wval = rval;
+}

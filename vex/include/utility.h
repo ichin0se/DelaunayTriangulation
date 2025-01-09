@@ -1,10 +1,32 @@
-function int is_ilegal(int primNum; int oppositePoint){
-	/*
-	Check if edge is ilegal.
-	*/
+/*
+ * Produced by:
+ *	Keito Kurata
+ *	22AU0139
+ *	Graduate School of Computer Graphics
+ *	Japan Electronics College
+ *
+ * NAME:	utility.h ( VEX Library Functions / VEX )
+ *
+ * COMMENTS:	Utility functions for Delaunay Triangulation.
+ *
+ */
 
-	//define circumscribed circle.
-	int points[] = primpoints(0, primNum);
+
+
+ //	Verify if edge is illegal.
+function int is_illegal(EDGE e; int pivotPoint, checkPoint) {
+
+	//	Define circumscribed circle.
+	int hedge = pointhedge(0, e.first, e.second);
+	int prim = hedge_prim(0, hedge);
+	int points[] = primpoints(0, prim);
+	//*/
+	if(find(points, pivotPoint) < 0) {
+		hedge = hedge_nextequiv(0, hedge);
+		prim = hedge_prim(0, hedge);
+		points = primpoints(0, prim);
+	}
+//*/
 	vector pos1 = point(0, "P", points[0]);
 	vector pos2 = point(0, "P", points[1]);
 	vector pos3 = point(0, "P", points[2]);
@@ -18,63 +40,56 @@ function int is_ilegal(int primNum; int oppositePoint){
 	vector centerPos = set(x, 0, y);
 	float radius = distance(centerPos, pos1);
 
-	//Is the point inside the circumcircle?
-	int nearpoint = nearpoint(0, "__tmp_checkPoint", centerPos, radius);
+	//	Check if the point is inside the circumscribed circle.
+	string condition = "@ptnum == " + itoa(checkPoint);
+	int nearpoint = nearpoint(0, condition, centerPos, radius);
 	int ilegal_flg = nearpoint == -1 ? 0 : 1;
 
-	//for the test
+	//	For visualize.
 	setdetailattrib(0, "centerPos", centerPos, "set");
 	setdetailattrib(0, "radius", radius, "set");
-	setdetailattrib(0, "nearpoint", nearpoint, "set");
+	//setdetailattrib(0, "nearpoint", nearpoint, "set");
 
 	return ilegal_flg;
+
 }
 
 
-function int findOppositePoint(int primNum; EDGE e){
-	/*
-	Find points that are included in the prim "primNum" but not included in the edge "e".
-	*/
+//	Search for points contained in primitives that are not contained in edges.
+function int findOppositePoint(int primNum; EDGE e) {
+
 	int points[] = primpoints(0, primNum);
-	int oppositePoint = points[0] + points[1] + points[2] - e->first() - e->second();
+	int oppositePoint = points[0] + points[1] + points[2] - e.first - e.second;
 	return oppositePoint;
+
 }
 
 
-function int findOppositePrim(int primNum; EDGE e){
-	/*
-	Find prims that share edge "e" included in the prim "primNum".
-	*/
-	int hedge = pointhedge(0, e->first(), e->second());
+//	Search for primitives that share edges with primitives.
+function int findOppositePrim(int primNum; EDGE e) {
+
+	int hedge = pointhedge(0, e.first, e.second);
 	hedge = hedge_prim(0, hedge) == primNum ? hedge_nextequiv(0, hedge) : hedge;
 	int oppositePrim = hedge_prim(0, hedge);
 
 	return oppositePrim;
+
 }
 
 
-function EDGE findFlipEdge(int primNum, targetPoint){
-	/*
-	Find an edge to flip,
-	In other words, Find an edge that is included in prim "primNum" but does not include point "targetPoint"
-	*/
-	int hedge = primhedge(0, primNum);
-	int srcPoint = hedge_srcpoint(0, hedge);
-	int dstPoint = hedge_dstpoint(0, hedge);
+//	Flip edges shared by two primitives.
+function void flipEdge(EDGE e; int pointA, pointB) {
 
-	for(int i = 0; i < 2; i++){
-		if(srcPoint == targetPoint || dstPoint == targetPoint){
-			hedge = hedge_next(0, hedge);
-		}else{
-			break;
-		}
-	}
-	srcPoint = hedge_srcpoint(0, hedge);
-	dstPoint = hedge_dstpoint(0, hedge);
+	int hedge = pointhedge(0, e->first(), e->second());
+	int prim = hedge_prim(0, hedge);
+	removeprim(0, prim, 0);
+	hedge = hedge_nextequiv(0, hedge);
+	prim = hedge_prim(0, hedge);
+	removeprim(0, prim, 0);
 
-	EDGE edge;
-	edge.first = srcPoint;
-	edge.second = dstPoint;
+	int prim1 = addprim(0, "poly", pointA, e->first(), pointB);
+	int prim2 = addprim(0, "poly", pointB, e->second(), pointA);
+	setprimattrib(0, "Cd", prim1, {1, 1, 0}, "set");
+	setprimattrib(0, "Cd", prim2, {1, 1, 0}, "set");
 
-	return edge;
 }

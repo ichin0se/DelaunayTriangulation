@@ -9,7 +9,6 @@ Houdini: 20.5.278 (Production Build) Education Edition
 .\
 └── vex\
 │    ├── CVex\
-│    │    ├── Legalize.vex\
 │    │    └── Legalize.vfl\
 │    └── include\
 │          ├── edge.h\

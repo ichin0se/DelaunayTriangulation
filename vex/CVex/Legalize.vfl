@@ -1,0 +1,44 @@
+/*
+ * Produced by:
+ *	Keito Kurata
+ *	22AU0139
+ *	Graduate School of Computer Graphics
+ *	Japan Electronics College
+ *
+ * NAME:	Legalize.vfl ( CVex Shader )
+ *
+ * COMMENTS:	Implementation of the recursion functions for legalize with CVex.
+ *
+ */
+#include <assert.h>
+#include <edge.h>
+#include <utility.h>
+#define println(label, value) printf("%s: %f\n", label, value)
+
+//	Recursive Legalization.
+cvex Legalize(EDGE edge = {0, 0}; int pivotPoint = 0; export int flipCount = 0) {
+
+	//	Search for edges to flip and other points.
+	int hedge = pointhedge(0, edge->first(), edge->second());
+	int checkPrim = hedge_prim(0, hedge);
+	int oppositePrim = findOppositePrim(checkPrim, edge);
+
+	int pointA = findOppositePoint(checkPrim, edge);
+	int pointB = findOppositePoint(oppositePrim, edge);
+
+//	Check if the edge is illigal, and recursively flip if the edge is illigal.
+	if(checkPrim != oppositePrim && pointA != pointB) {
+		if(is_illegal(edge, pointA, pointB) == 1) {
+			flipEdge(edge, pointA, pointB);
+			flipCount += 1;
+
+			int pointC = pivotPoint != pointA ? pointA : pointB;
+			EDGE e1 = EDGE(edge->first(), pointC);
+			EDGE e2 = EDGE(edge->second(), pointC);
+			int flipCountA = 0;
+			int flipCountB = 0;
+			Legalize("edge", e1, "pivotPoint", pivotPoint, "flipCount", flipCountA);
+			Legalize("edge", e2, "pivotPoint", pivotPoint, "flipCount", flipCountB);
+		}
+	}
+}
